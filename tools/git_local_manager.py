@@ -241,6 +241,11 @@ class GitLocalManager:
     def stage(self, paths: Sequence[str | Path] = (".",)) -> None:
         """Stage file changes in the index.
 
+        Honours ``.gitignore`` rules, exactly like ``git add``. (GitPython's
+        ``index.add`` is deliberately avoided here: it walks the working
+        tree itself and writes index entries directly, bypassing ignore
+        rules.)
+
         Args:
             paths: Paths to stage, relative to the repository root (or
                 absolute paths inside the repository). Defaults to the
@@ -248,12 +253,13 @@ class GitLocalManager:
 
         Raises:
             GitLocalError: When a path lies outside the repository.
-            GitOperationError: When the underlying Git operation fails.
+            GitOperationError: When the underlying Git operation fails
+                (including when an explicitly requested path is ignored).
         """
         repo = self._require_repository()
         normalized = [self._to_repo_relative(path) for path in paths]
         try:
-            repo.index.add(normalized)
+            repo.git.add(*normalized)
         except (GitCommandError, OSError) as exc:
             raise GitOperationError(
                 f"Failed to stage {normalized} in '{self._repo_path}': {exc}"
