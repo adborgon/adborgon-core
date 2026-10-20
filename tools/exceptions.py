@@ -1,10 +1,10 @@
-"""Custom exception hierarchy for Bionic Core.
+"""Custom exception hierarchy for Adborgon Core.
 
 Every error raised inside this package derives from
-:class:`BionicCoreError`, so an orchestrator can catch a single base class
+:class:`AdborgonCoreError`, so an orchestrator can catch a single base class
 while still being able to discriminate fine-grained failures::
 
-    from Core.tools.exceptions import BionicCoreError, SandboxError
+    from Core.tools.exceptions import AdborgonCoreError, SandboxError
 
     try:
         manager.execute("pytest -v", code_path)
@@ -17,8 +17,8 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 
-class BionicCoreError(Exception):
-    """Base class for every error raised by Bionic Core.
+class AdborgonCoreError(Exception):
+    """Base class for every error raised by Adborgon Core.
 
     Attributes:
         message: Human-readable description of the failure.
@@ -42,7 +42,7 @@ class BionicCoreError(Exception):
 # ---------------------------------------------------------------------------
 # Sandbox (Docker) errors
 # ---------------------------------------------------------------------------
-class SandboxError(BionicCoreError):
+class SandboxError(AdborgonCoreError):
     """Base class for failures of the Docker test sandbox."""
 
 
@@ -92,7 +92,7 @@ class SandboxExecutionError(SandboxError):
 # ---------------------------------------------------------------------------
 # Local Git errors
 # ---------------------------------------------------------------------------
-class GitLocalError(BionicCoreError):
+class GitLocalError(AdborgonCoreError):
     """Base class for local Git operation failures."""
 
 
@@ -111,7 +111,7 @@ class GitOperationError(GitLocalError):
 # ---------------------------------------------------------------------------
 # Bootstrap (CLI orchestration) errors
 # ---------------------------------------------------------------------------
-class BootstrapError(BionicCoreError):
+class BootstrapError(AdborgonCoreError):
     """Base class for project bootstrap failures."""
 
 
@@ -134,7 +134,7 @@ class RollbackError(BootstrapError):
 # ---------------------------------------------------------------------------
 # Project Docker lifecycle errors
 # ---------------------------------------------------------------------------
-class ProjectDockerError(BionicCoreError):
+class ProjectDockerError(AdborgonCoreError):
     """Base class for per-project Docker lifecycle failures."""
 
 
