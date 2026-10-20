@@ -1,11 +1,11 @@
-"""Logging helpers for Bionic Core.
+"""Logging helpers for Adborgon Core.
 
 Every module obtains its logger through :func:`get_logger`, which guarantees
 a single, consistent format and timestamp layout across the package while
 keeping full traceability (module-level logger names are preserved).
 
 The helper is deliberately non-invasive: if the host application (e.g., the
-Bionic orchestrator) has already attached handlers to the root logger, this
+Adborgon orchestrator) has already attached handlers to the root logger, this
 package does not add its own and the host configuration wins.
 """
 from __future__ import annotations
@@ -39,12 +39,12 @@ def _install_default_handler_if_needed() -> None:
 
 
 def get_logger(name: str | None = None, *, level: int = _DEFAULT_LEVEL) -> logging.Logger:
-    """Return a logger for a Bionic Core module.
+    """Return a logger for a Adborgon Core module.
 
     Args:
         name: Dotted logger name, typically the module's ``__name__`` so
             each tool keeps an independent, traceable namespace. When
-            omitted, the package-level ``bionic.core`` logger is returned.
+            omitted, the package-level ``Adborgon.core`` logger is returned.
         level: Minimum severity for the returned logger when it has no
             explicit level configured.
 
@@ -52,7 +52,7 @@ def get_logger(name: str | None = None, *, level: int = _DEFAULT_LEVEL) -> loggi
         A configured :class:`logging.Logger` instance.
     """
     _install_default_handler_if_needed()
-    logger = logging.getLogger(name) if name is not None else logging.getLogger("bionic.core")
+    logger = logging.getLogger(name) if name is not None else logging.getLogger("Adborgon.core")
     if logger.level == logging.NOTSET:
         logger.setLevel(level)
     return logger
