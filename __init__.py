@@ -1,6 +1,6 @@
-"""Bionic Core.
+"""Adborgon Core.
 
-Local abstraction layer used by the Bionic orchestrator to manage software
+Local abstraction layer used by the Adborgon orchestrator to manage software
 projects autonomously:
 
 * **Sandbox** — ephemeral, network-isolated Docker test execution
@@ -10,12 +10,12 @@ projects autonomously:
 * **Bootstrap** — CLI that replicates the shared project template
   (``adborgon/GithubTemplate``, materialized locally by the agent through
   its GitHub MCP tools) and initializes the local repository with the
-  initial commit (:mod:`Core.tools.bionic_bootstrap`).
+  initial commit (:mod:`Core.tools.Adborgon_bootstrap`).
 
 The public API is resolved lazily (PEP 562) so importing the package does
 not force the optional ``docker`` dependency::
 
-    from Core import GitLocalManager, BionicCoreError
+    from Core import GitLocalManager, AdborgonCoreError
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any
 __version__: str = "1.0.0"
 
 __all__: list[str] = [
-    "BionicCoreError",
+    "AdborgonCoreError",
     "DockerSandboxManager",
     "GitLocalManager",
     "ProjectDockerError",
@@ -34,13 +34,13 @@ __all__: list[str] = [
 ]
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    from Core.tools.exceptions import BionicCoreError, ProjectDockerError
+    from Core.tools.exceptions import AdborgonCoreError, ProjectDockerError
     from Core.tools.git_local_manager import GitLocalManager
     from Core.tools.project_docker_manager import ProjectDockerManager
     from Core.tools.sandbox_manager import DockerSandboxManager, SandboxExecutionResult
 
 _LAZY_EXPORTS: dict[str, str] = {
-    "BionicCoreError": "Core.tools.exceptions",
+    "AdborgonCoreError": "Core.tools.exceptions",
     "GitLocalManager": "Core.tools.git_local_manager",
     "ProjectDockerError": "Core.tools.exceptions",
     "ProjectDockerManager": "Core.tools.project_docker_manager",
