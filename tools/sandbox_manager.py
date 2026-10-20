@@ -50,12 +50,12 @@ except ImportError:  # Direct execution of a script from the tools directory.
 logger = get_logger(__name__)
 
 #: Default sandbox image (extends python:3.11-slim with pytest). It is
-#: built automatically on first use from ``Core/docker/Adborgon-sandbox``.
-DEFAULT_IMAGE: str = "Adborgon-sandbox:latest"
+#: built automatically on first use from ``Core/docker/adborgon-sandbox``.
+DEFAULT_IMAGE: str = "adborgon-sandbox:latest"
 DEFAULT_MEMORY_LIMIT: str = "512m"
 DEFAULT_CONTAINER_WORKDIR: str = "/workspace"
 DEFAULT_COMMAND_TIMEOUT: int = 600
-SANDBOX_LABEL: str = "Adborgon.sandbox"
+SANDBOX_LABEL: str = "adborgon.sandbox"
 
 try:  # ``workdir`` was renamed to ``working_dir`` in docker SDK 7.x.
     from docker.models.containers import RUN_CREATE_KWARGS as _SDK_CREATE_KWARGS
@@ -66,7 +66,7 @@ except ImportError:  # pragma: no cover - extremely old SDKs
 
 #: Build context of the default sandbox image, bundled with this package.
 _SANDBOX_DOCKERFILE_CONTEXT: Path = (
-    Path(__file__).resolve().parents[1] / "docker" / "Adborgon-sandbox"
+    Path(__file__).resolve().parents[1] / "docker" / "adborgon-sandbox"
 )
 
 
@@ -137,7 +137,7 @@ class DockerSandboxManager:
 
         Args:
             image: Docker image used for the sandbox. The default
-                ``Adborgon-sandbox:latest`` (pytest included) is built
+                ``adborgon-sandbox:latest`` (pytest included) is built
                 automatically on first use; pass a custom image only when
                 it already contains the needed dependencies (the sandbox
                 has no network access).
@@ -294,7 +294,7 @@ class DockerSandboxManager:
         self.ensure_image()
 
         argv = ["/bin/sh", "-c", command] if isinstance(command, str) else [str(part) for part in command]
-        container_name = f"Adborgon-sandbox-{uuid.uuid4().hex[:12]}"
+        container_name = f"adborgon-sandbox-{uuid.uuid4().hex[:12]}"
         volumes = {
             host_dir.as_posix(): {
                 "bind": self._container_workdir,
@@ -364,7 +364,7 @@ class DockerSandboxManager:
             The :class:`SandboxExecutionResult` of the pytest run.
 
         Note:
-            The default ``Adborgon-sandbox`` image ships pytest. When using a
+            The default ``adborgon-sandbox`` image ships pytest. When using a
             custom ``image=`` without the test dependencies, remember that
             the sandbox has no network access: bake the dependencies into
             the image instead.

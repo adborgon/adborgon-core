@@ -10,7 +10,7 @@ projects autonomously:
 * **Bootstrap** — CLI that replicates the shared project template
   (``adborgon/GithubTemplate``, materialized locally by the agent through
   its GitHub MCP tools) and initializes the local repository with the
-  initial commit (:mod:`Core.tools.Adborgon_bootstrap`).
+  initial commit (:mod:`Core.tools.adborgon_bootstrap`).
 
 The public API is resolved lazily (PEP 562) so importing the package does
 not force the optional ``docker`` dependency::

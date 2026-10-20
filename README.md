@@ -24,7 +24,7 @@ compartido `adborgon/GithubTemplate`, y ciclo de vida Docker por proyecto
 
 ### Con la skill de Adborgon (recomendado)
 
-Instala la [skill `Adborgon-core-workflow`](#Adborgon-skill-Adborgon-core-workflow)
+Instala la [skill `core-workflow`](#adborgon-skill-core-workflow)
 (más abajo en este README). Cuando se activa, detecta si
 `C:\Adborgon\Core` existe y, si no, **clona este repositorio ahí e instala
 `requirements.txt` por ti** (sección 0 de la skill).
@@ -36,27 +36,35 @@ git clone https://github.com/adborgon/Adborgon-core.git C:\Adborgon\Core
 python -m pip install -r C:\Adborgon\Core\requirements.txt
 ```
 
-## Adborgon skill (`Adborgon-core-workflow`)
+## Adborgon skill (`core-workflow`)
 
 La skill orquesta todo el flujo: bootstrap → tests en sandbox → commit →
 push a GitHub → Docker. Una vez instalada, el agente no ejecuta nunca
 `git`/`pytest`/`docker` en la shell del host: todo pasa por `C:\Adborgon\Core`.
 
-Contenido completo de `SKILL.md` — guárdalo en
-`~/.lmstudio/skills/Adborgon-core-workflow/SKILL.md` (en Windows:
-`C:\Users\<usuario>\.lmstudio\skills\Adborgon-core-workflow\SKILL.md`):
+El contenido actual de `SKILL.md` (fuente de verdad) está instalado en la
+plataforma del agente; en Roo Code: `C:\Users\<usuario>\.roo\skills\core-workflow\SKILL.md`.
+A continuación se muestra el contenido completo sincronizado:
 
 ````markdown
 ---
-name: Adborgon-core-workflow
-description: Orquesta la creación de proyectos desde adborgon/GithubTemplate,
-  el control de versiones local, la ejecución de tests en sandbox aislado y
-  el ciclo de vida Docker usando C:\Adborgon\Core. Úsala siempre que se cree
-  un proyecto nuevo o se ejecuten tests, commits o contenedores en un
-  proyecto Adborgon.
+name: core-workflow
+description: >-
+  Orquesta la creación de proyectos desde adborgon/GithubTemplate, el
+  control de versiones local, la ejecución de tests en sandbox aislado y el
+  ciclo de vida Docker usando C:\Adborgon\Core. Úsala siempre que se cree un
+  proyecto nuevo o se ejecuten tests, commits o contenedores en un proyecto
+modeSlugs:
+  - orchestrator
+  - code
+  - architect
 ---
 
-# Adborgon Core — Contrato de Orquestación
+# Core Workflow
+
+## Instructions
+
+Contrato de Orquestación
 
 Nunca ejecutes comandos `git`, `pytest` o `docker` directamente en la shell del host. Toda operación debe realizarse a través de `C:\Adborgon\Core` (`sys.path.insert(0, r"C:\Adborgon")`).
 
@@ -93,13 +101,13 @@ Verificación: `python -c "import sys; sys.path.insert(0, r'C:\\Adborgon'); impo
    - Si no existe o el usuario pide actualizarla, usa las herramientas MCP de GitHub para descargar los archivos del repositorio `adborgon/GithubTemplate` (rama `main`) en `C:\Adborgon\templates\adborgon\GithubTemplate`.
 2. **Ejecutar Bootstrapper:**
    ```powershell
-   python C:\Adborgon\Core\tools\Adborgon_bootstrap.py --name <slug-proyecto> --description "<descripción>" --workdir C:\Adborgon\projects
+   python C:\Adborgon\Core\tools\adborgon_bootstrap.py --name <slug-proyecto> --description "<descripción>" --workdir C:\Adborgon\projects
    ```
    Crea `C:\Adborgon\projects\<slug>` con `.Adborgon/project.json`, README especializado e initial commit en `main` (con rollback automático si falla).
 
 ## 2. Tests en Sandbox Aislado (Docker)
 
-Nunca uses `pytest` del host. Usa `DockerSandboxManager` (la imagen `Adborgon-sandbox:latest` se auto-construye; el contenedor es efímero, sin red y limitado a 512 MB):
+Nunca uses `pytest` del host. Usa `DockerSandboxManager` (la imagen `adborgon-sandbox:latest` se auto-construye; el contenedor es efímero, sin red y limitado a 512 MB):
 
 ```python
 import sys
@@ -136,7 +144,7 @@ results = mgr.push()  # push de la rama activa -> list[git.PushInfo]
 from Core.tools import ProjectDockerManager
 
 with ProjectDockerManager(r"C:\Adborgon\projects\<slug>") as docker:
-    docker.build()                          # -> Adborgon-<slug>:latest
+    docker.build()                          # -> adborgon-<slug>:latest
     docker.run_local(command=["100", "c"])  # CLI; servicios: ports={"8000/tcp": 8000}
     print(docker.logs())
     docker.push(tag="0.1.0")                # -> ghcr.io/<usuario>/<slug>:0.1.0
@@ -156,9 +164,9 @@ with ProjectDockerManager(r"C:\Adborgon\projects\<slug>") as docker:
 1. **Vía el agente (recomendado):** pega el contenido en una sesión de Adborgon
    y pide «instala esta skill». El agente la valida y la instala globalmente
    (pidiéndote tu aprobación).
-2. **Manual:** crea la carpeta `~/.lmstudio/skills/Adborgon-core-workflow/`,
-   guarda el contenido como `SKILL.md` y úsala escribiendo
-   `@Adborgon-core-workflow` en el chat.
+2. **Manual:** crea la carpeta `~/.roo/skills/core-workflow/`,
+   guarda el contenido como `SKILL.md` y úsala invocando la skill
+   `core-workflow` en el chat.
 
 Con la skill instalada, si `C:\Adborgon\Core` no existe, la skill lo instala
 automáticamente desde este repositorio (sección 0).
@@ -170,7 +178,7 @@ Core/
 ├── __init__.py                  # API pública (lazy, PEP 562)
 ├── requirements.txt             # docker, GitPython
 ├── docker/
-│   └── Adborgon-sandbox/
+│   └── adborgon-sandbox/
 │       └── Dockerfile           # Imagen del sandbox (se auto-construye)
 └── tools/
     ├── __init__.py              # API del subpaquete (Docker lazy)
@@ -179,7 +187,7 @@ Core/
     ├── _docker_runtime.py       # Conexión compartida al daemon Docker
     ├── sandbox_manager.py       # DockerSandboxManager (Módulo 1)
     ├── git_local_manager.py     # GitLocalManager (Módulo 2)
-    ├── Adborgon_bootstrap.py      # CLI orquestadora (Módulo 3)
+    ├── adborgon_bootstrap.py    # CLI orquestadora (Módulo 3)
     └── project_docker_manager.py# ProjectDockerManager (Módulo 4)
 ```
 
@@ -195,9 +203,9 @@ with DockerSandboxManager() as sandbox:
     print(result.exit_code, result.stdout, result.success)
 ```
 
-La imagen por defecto `Adborgon-sandbox:latest` extiende `python:3.11-slim`
+La imagen por defecto `adborgon-sandbox:latest` extiende `python:3.11-slim`
 con **pytest** y se **construye sola en el primer uso** desde
-`Core/docker/Adborgon-sandbox`. El contenedor es **efímero** (se destruye
+`Core/docker/adborgon-sandbox`. El contenedor es **efímero** (se destruye
 tras cada ejecución, incluso en fallo), **aislado de red**, con límite de
 memoria de **512 MB**, sin capacidades y usuario no privilegiado. El
 volumen de código se monta en `/workspace` (solo lectura por defecto).
@@ -228,7 +236,7 @@ usa la configuración de credenciales de Git del sistema.
 ### 3) Bootstrap de proyecto (CLI)
 
 ```powershell
-python C:\Adborgon\Core\tools\Adborgon_bootstrap.py `
+python C:\Adborgon\Core\tools\adborgon_bootstrap.py `
     --name my-project --description "Qué hace el proyecto"
 ```
 
@@ -237,7 +245,7 @@ Contrato de orquestación:
 1. **MCP (agente)**: al ejecutar el script, el agente Adborgon descarga los
    archivos base de `adborgon/GithubTemplate` con sus herramientas MCP de
    GitHub y los materializa en `C:\Adborgon\templates\adborgon\GithubTemplate`
-   (o la ruta de `--template-source` / `$Adborgon_TEMPLATE_SOURCE`),
+   (o la ruta de `--template-source` / `$ADBORGON_TEMPLATE_SOURCE`),
    verificando la integridad por SHA de cada blob.
 2. **Replicación local**: el script copia el template, especializa el
    `README.md` y escribe `.Adborgon/project.json` (nombre, descripción,
@@ -252,7 +260,7 @@ El template incluye ya: `Dockerfile` (con `ENTRYPOINT`), `.dockerignore`,
 `python -m app`) y `tests/test_smoke.py`.
 
 Opciones: `--template-source`, `--workdir` (default: directorio actual),
-`--author "Name <email>"` (o `$Adborgon_AUTHOR`).
+`--author "Name <email>"` (o `$ADBORGON_AUTHOR`).
 
 ### 4) Ciclo de vida Docker por proyecto
 
@@ -260,7 +268,7 @@ Opciones: `--template-source`, `--workdir` (default: directorio actual),
 from Core.tools import ProjectDockerManager
 
 with ProjectDockerManager(r"C:\Adborgon\projects\tienda-web") as docker:
-    docker.build()                    # -> Adborgon-tienda-web:latest
+    docker.build()                    # -> adborgon-tienda-web:latest
     docker.run_local(ports={"8000/tcp": 8000}, env={"APP_NAME": "tienda"})
     # ... desarrollar / probar localmente ...
     docker.push(tag="1.0.0")          # -> ghcr.io/adborgon/tienda-web:1.0.0

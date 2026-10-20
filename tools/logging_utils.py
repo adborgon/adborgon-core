@@ -44,7 +44,7 @@ def get_logger(name: str | None = None, *, level: int = _DEFAULT_LEVEL) -> loggi
     Args:
         name: Dotted logger name, typically the module's ``__name__`` so
             each tool keeps an independent, traceable namespace. When
-            omitted, the package-level ``Adborgon.core`` logger is returned.
+            omitted, the package-level ``adborgon.core`` logger is returned.
         level: Minimum severity for the returned logger when it has no
             explicit level configured.
 
@@ -52,7 +52,7 @@ def get_logger(name: str | None = None, *, level: int = _DEFAULT_LEVEL) -> loggi
         A configured :class:`logging.Logger` instance.
     """
     _install_default_handler_if_needed()
-    logger = logging.getLogger(name) if name is not None else logging.getLogger("Adborgon.core")
+    logger = logging.getLogger(name) if name is not None else logging.getLogger("adborgon.core")
     if logger.level == logging.NOTSET:
         logger.setLevel(level)
     return logger

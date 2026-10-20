@@ -20,7 +20,7 @@ Orchestration contract (implicit MCP integration)
 
 Usage::
 
-    python C:\\Adborgon\\Core\\tools\\Adborgon_bootstrap.py \\
+    python C:\\Adborgon\\Core\\tools\\adborgon_bootstrap.py \\
         --name my-project --description "What the project does"
 """
 from __future__ import annotations
@@ -69,9 +69,9 @@ _SCRIPT_VERSION: str = "1.0.0"
 TEMPLATE_REPOSITORY: str = "adborgon/GithubTemplate"
 
 #: Fallback location where the agent materializes the template.
-Adborgon_ROOT: Path = Path(os.environ.get("Adborgon_ROOT", r"C:\Adborgon"))
-DEFAULT_TEMPLATE_DIR: Path = Adborgon_ROOT / "templates" / TEMPLATE_REPOSITORY
-TEMPLATE_SOURCE_ENV_VAR: str = "Adborgon_TEMPLATE_SOURCE"
+ADBORGON_ROOT: Path = Path(os.environ.get("ADBORGON_ROOT", r"C:\Adborgon"))
+DEFAULT_TEMPLATE_DIR: Path = ADBORGON_ROOT / "templates" / TEMPLATE_REPOSITORY
+TEMPLATE_SOURCE_ENV_VAR: str = "ADBORGON_TEMPLATE_SOURCE"
 
 #: Characters allowed in a project (folder) name.
 _PROJECT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -233,10 +233,10 @@ class ProjectBootstrapper:
             "template": {
                 "repository": TEMPLATE_REPOSITORY,
                 "materialized_from": str(self._template_source),
-                "acquisition": "Adborgon-agent-mcp",
+                "acquisition": "adborgon-agent-mcp",
             },
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "bootstrap": {"script": "Adborgon_bootstrap.py", "version": _SCRIPT_VERSION},
+            "bootstrap": {"script": "adborgon_bootstrap.py", "version": _SCRIPT_VERSION},
         }
         try:
             metadata_dir = target / ".Adborgon"
@@ -396,7 +396,7 @@ def build_parser() -> argparse.ArgumentParser:
         The configured :class:`argparse.ArgumentParser`.
     """
     parser = argparse.ArgumentParser(
-        prog="Adborgon_bootstrap",
+        prog="adborgon_bootstrap",
         description=(
             f"Bootstrap a new local project from the '{TEMPLATE_REPOSITORY}' template. "
             "The template files must already be materialized locally by the Adborgon agent "
@@ -436,11 +436,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--author",
-        default=os.environ.get("Adborgon_AUTHOR"),
+        default=os.environ.get("ADBORGON_AUTHOR"),
         metavar="NAME <EMAIL>",
         help=(
             "Identity for the initial commit "
-            "(default: local Git configuration or $Adborgon_AUTHOR)."
+            "(default: local Git configuration or $ADBORGON_AUTHOR)."
         ),
     )
     return parser

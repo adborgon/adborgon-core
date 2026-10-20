@@ -1,4 +1,4 @@
-# Bionic sandbox image — extended test environment for DockerSandboxManager.
+# Adborgon sandbox image — extended test environment for DockerSandboxManager.
 #
 # The sandbox runs with network_disabled=True at runtime, so every testing
 # tool must be baked in here. Base: python:3.11-slim.
