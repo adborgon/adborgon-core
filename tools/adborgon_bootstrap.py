@@ -1,16 +1,16 @@
-"""Bionic project bootstrap — CLI entry point and local orchestrator.
+"""Adborgon project bootstrap — CLI entry point and local orchestrator.
 
 Orchestration contract (implicit MCP integration)
 =================================================
-1. **Template acquisition (Bionic agent + MCP).** When this script is
-   invoked, the Bionic agent connects to the ``adborgon/GithubTemplate``
+1. **Template acquisition (Adborgon agent + MCP).** When this script is
+   invoked, the Adborgon agent connects to the ``adborgon/GithubTemplate``
    repository through its native GitHub MCP tools, downloads the base files
    and materializes them in a local template directory. This script does
    **not** talk to the GitHub API (by design, no Python-level GitHub
    integration): it consumes the already materialized template
    (``--template-source``).
 2. **Local replication.** The template is copied into a fresh project
-   directory (``--workdir``/``--name``), the README and the ``.bionic/``
+   directory (``--workdir``/``--name``), the README and the ``.Adborgon/``
    metadata are specialized for the new project.
 3. **Local Git initialization.** :class:`GitLocalManager` initializes the
    repository, stages every downloaded file and creates the initial
@@ -20,7 +20,7 @@ Orchestration contract (implicit MCP integration)
 
 Usage::
 
-    python C:\\Bionic\\Core\\tools\\bionic_bootstrap.py \\
+    python C:\\Adborgon\\Core\\tools\\Adborgon_bootstrap.py \\
         --name my-project --description "What the project does"
 """
 from __future__ import annotations
@@ -40,7 +40,7 @@ from typing import Sequence
 
 try:  # Package context (``Core.tools`` or a standalone ``tools`` package).
     from .exceptions import (
-        BionicCoreError,
+        AdborgonCoreError,
         BootstrapError,
         InvalidProjectNameError,
         RollbackError,
@@ -51,7 +51,7 @@ try:  # Package context (``Core.tools`` or a standalone ``tools`` package).
     from .logging_utils import get_logger
 except ImportError:  # Direct execution of this file from the tools directory.
     from exceptions import (
-        BionicCoreError,
+        AdborgonCoreError,
         BootstrapError,
         InvalidProjectNameError,
         RollbackError,
@@ -69,9 +69,9 @@ _SCRIPT_VERSION: str = "1.0.0"
 TEMPLATE_REPOSITORY: str = "adborgon/GithubTemplate"
 
 #: Fallback location where the agent materializes the template.
-BIONIC_ROOT: Path = Path(os.environ.get("BIONIC_ROOT", r"C:\Bionic"))
-DEFAULT_TEMPLATE_DIR: Path = BIONIC_ROOT / "templates" / TEMPLATE_REPOSITORY
-TEMPLATE_SOURCE_ENV_VAR: str = "BIONIC_TEMPLATE_SOURCE"
+Adborgon_ROOT: Path = Path(os.environ.get("Adborgon_ROOT", r"C:\Adborgon"))
+DEFAULT_TEMPLATE_DIR: Path = Adborgon_ROOT / "templates" / TEMPLATE_REPOSITORY
+TEMPLATE_SOURCE_ENV_VAR: str = "Adborgon_TEMPLATE_SOURCE"
 
 #: Characters allowed in a project (folder) name.
 _PROJECT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -92,7 +92,7 @@ class ProjectBootstrapper:
     Responsibilities (single, cohesive):
         * Validate the requested project name and description.
         * Replicate the locally materialized template.
-        * Specialize the project metadata (``.bionic/project.json``) and
+        * Specialize the project metadata (``.Adborgon/project.json``) and
           the README.
         * Initialize the local Git repository and create the initial
           commit via :class:`GitLocalManager`.
@@ -171,7 +171,7 @@ class ProjectBootstrapper:
             exc.__traceback__ = None
             gc.collect()
             self._rollback(target)
-            if isinstance(exc, BionicCoreError):
+            if isinstance(exc, AdborgonCoreError):
                 raise
             logger.exception("Unexpected failure while bootstrapping '%s'.", name)
             raise BootstrapError(
@@ -196,7 +196,7 @@ class ProjectBootstrapper:
         if not self._template_source.is_dir():
             raise TemplateSourceError(
                 f"Template source '{self._template_source}' does not exist or is not a "
-                f"directory. The Bionic agent must first download the base files from "
+                f"directory. The Adborgon agent must first download the base files from "
                 f"'{TEMPLATE_REPOSITORY}' using its GitHub MCP tools and materialize them "
                 f"at that path (or pass --template-source explicitly).",
                 details={
@@ -217,7 +217,7 @@ class ProjectBootstrapper:
         logger.info("Template replicated from '%s' to '%s'.", self._template_source, target)
 
     def _write_project_metadata(self, target: Path, name: str, description: str) -> None:
-        """Persist machine-readable project metadata under ``.bionic/``.
+        """Persist machine-readable project metadata under ``.Adborgon/``.
 
         Args:
             target: Project directory.
@@ -233,13 +233,13 @@ class ProjectBootstrapper:
             "template": {
                 "repository": TEMPLATE_REPOSITORY,
                 "materialized_from": str(self._template_source),
-                "acquisition": "bionic-agent-mcp",
+                "acquisition": "Adborgon-agent-mcp",
             },
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "bootstrap": {"script": "bionic_bootstrap.py", "version": _SCRIPT_VERSION},
+            "bootstrap": {"script": "Adborgon_bootstrap.py", "version": _SCRIPT_VERSION},
         }
         try:
-            metadata_dir = target / ".bionic"
+            metadata_dir = target / ".Adborgon"
             metadata_dir.mkdir(parents=True, exist_ok=True)
             (metadata_dir / "project.json").write_text(
                 json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -248,7 +248,7 @@ class ProjectBootstrapper:
             raise BootstrapError(
                 f"Failed to write project metadata into '{target}': {exc}"
             ) from exc
-        logger.info("Project metadata written to '%s'.", target / ".bionic" / "project.json")
+        logger.info("Project metadata written to '%s'.", target / ".Adborgon" / "project.json")
 
     def _customize_readme(self, target: Path, name: str, description: str) -> None:
         """Specialize the template README with the new project identity.
@@ -396,10 +396,10 @@ def build_parser() -> argparse.ArgumentParser:
         The configured :class:`argparse.ArgumentParser`.
     """
     parser = argparse.ArgumentParser(
-        prog="bionic_bootstrap",
+        prog="Adborgon_bootstrap",
         description=(
             f"Bootstrap a new local project from the '{TEMPLATE_REPOSITORY}' template. "
-            "The template files must already be materialized locally by the Bionic agent "
+            "The template files must already be materialized locally by the Adborgon agent "
             "(GitHub MCP). The script replicates the structure, initializes the local "
             "Git repository and creates the initial commit, rolling back automatically "
             "on failure."
@@ -436,11 +436,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--author",
-        default=os.environ.get("BIONIC_AUTHOR"),
+        default=os.environ.get("Adborgon_AUTHOR"),
         metavar="NAME <EMAIL>",
         help=(
             "Identity for the initial commit "
-            "(default: local Git configuration or $BIONIC_AUTHOR)."
+            "(default: local Git configuration or $Adborgon_AUTHOR)."
         ),
     )
     return parser
@@ -519,7 +519,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             description=args.description,
             author=args.author,
         )
-    except BionicCoreError as exc:
+    except AdborgonCoreError as exc:
         logger.error("Bootstrap aborted: %s", exc)
         return 1
     except Exception:
