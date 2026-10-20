@@ -1,4 +1,4 @@
-"""Bionic Core local tools.
+"""Adborgon Core local tools.
 
 Public API:
 
@@ -18,7 +18,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from .exceptions import (
-    BionicCoreError,
+    AdborgonCoreError,
     BootstrapError,
     ContainerRunError,
     DirtyWorktreeError,
@@ -46,7 +46,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from .sandbox_manager import DockerSandboxManager, SandboxExecutionResult
 
 __all__: list[str] = [
-    "BionicCoreError",
+    "AdborgonCoreError",
     "BootstrapError",
     "ContainerRunError",
     "DockerBuildError",
