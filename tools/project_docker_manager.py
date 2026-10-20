@@ -1,8 +1,8 @@
 """Per-project Docker image lifecycle: build, run, publish, install.
 
-Implements the container pipeline for every Bionic project:
+Implements the container pipeline for every Adborgon project:
 
-* **Build** the project image from its ``Dockerfile`` (the Bionic template
+* **Build** the project image from its ``Dockerfile`` (the Adborgon template
   ships one; the agent specializes it per project type: web API, CLI, ...).
 * **Run** it locally in a dev container for development and testing.
 * **Push** it to a container registry (GHCR by default) so the exact image
@@ -15,7 +15,7 @@ Typical usage (agent side)::
 
     from Core.tools.project_docker_manager import ProjectDockerManager
 
-    with ProjectDockerManager(r"C:\\Bionic\\projects\\tienda-web") as docker:
+    with ProjectDockerManager(r"C:\\Adborgon\\projects\\tienda-web") as docker:
         docker.build()
         docker.run_local(ports={"8000/tcp": 8000}, env={"APP_NAME": "tienda"})
         # ... develop / test locally ...
@@ -96,7 +96,7 @@ class ProjectRunResult:
 
 
 class ProjectDockerManager:
-    """Builds and runs the Docker image of a Bionic project.
+    """Builds and runs the Docker image of a Adborgon project.
 
     Pipeline: ``build()`` → ``run_local()`` (dev/test) → ``push()``
     (registry) → ``pull_and_run()`` (install elsewhere).
@@ -121,7 +121,7 @@ class ProjectDockerManager:
         Args:
             project_path: Project directory containing the ``Dockerfile``.
             image_name: Local image name (default
-                ``bionic-<project-slug>:latest``).
+                ``Adborgon-<project-slug>:latest``).
             default_registry: Registry used by :meth:`push` /
                 :meth:`pull_and_run` (default ``ghcr.io``).
             client: Optional pre-connected :class:`docker.DockerClient`
@@ -129,7 +129,7 @@ class ProjectDockerManager:
         """
         self._project_path: Path = Path(project_path).expanduser().resolve()
         self._slug: str = _slugify(self._project_path.name)
-        self._image_name: str = image_name or f"bionic-{self._slug}:latest"
+        self._image_name: str = image_name or f"Adborgon-{self._slug}:latest"
         self._default_registry: str = default_registry
         self._client: "docker.DockerClient | None" = client
         self._dev_container: "docker.models.containers.Container | None" = None
@@ -198,7 +198,7 @@ class ProjectDockerManager:
             build_args: Optional ``--build-arg`` values.
 
         Returns:
-            The full local image reference (e.g. ``bionic-tienda:1.0.0``).
+            The full local image reference (e.g. ``Adborgon-tienda:1.0.0``).
 
         Raises:
             DockerBuildError: When no Dockerfile exists or the build fails.
@@ -254,7 +254,7 @@ class ProjectDockerManager:
             ports: Container→host port mapping, e.g. ``{"8000/tcp": 8000}``.
             env: Optional environment variables for the container.
             command: Optional argv override for the image's default CMD.
-            name: Optional container name (default ``bionic-dev-<slug>``).
+            name: Optional container name (default ``Adborgon-dev-<slug>``).
             image: Optional image reference override (default: the local
                 image built by :meth:`build`).
 
@@ -268,7 +268,7 @@ class ProjectDockerManager:
         self.stop()
         client = self._get_client()
         image_ref = image or self._image_name
-        container_name = name or f"bionic-dev-{self._slug}"
+        container_name = name or f"Adborgon-dev-{self._slug}"
         try:
             container = client.containers.run(
                 image_ref,
@@ -277,7 +277,7 @@ class ProjectDockerManager:
                 name=container_name,
                 ports=dict(ports or {}),
                 environment=dict(env or {}),
-                labels={"bionic.project": "true", "bionic.project.slug": self._slug},
+                labels={"Adborgon.project": "true", "Adborgon.project.slug": self._slug},
             )
         except ImageNotFound as exc:
             raise ContainerRunError(
