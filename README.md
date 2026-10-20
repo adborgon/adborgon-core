@@ -1,6 +1,6 @@
-# Bionic Core
+# Adborgon Core
 
-Capa local de abstracción que el agente **Bionic** usa para gestionar
+Capa local de abstracción que el agente **Adborgon** usa para gestionar
 proyectos de software de forma autónoma: sandbox de pruebas Docker, control
 de versiones local (GitPython), bootstrap de proyectos desde el template
 compartido `adborgon/GithubTemplate`, y ciclo de vida Docker por proyecto
@@ -12,7 +12,7 @@ compartido `adborgon/GithubTemplate`, y ciclo de vida Docker por proyecto
 |---|---|
 | Python 3.10+ con `pip` | Core, GitPython y Docker SDK |
 | Docker con daemon activo (en Windows: Docker Desktop) | Sandbox de tests y ciclo de vida Docker de proyectos |
-| **Bionic con el MCP de GitHub conectado** | Materializar la plantilla `adborgon/GithubTemplate` si no existe, y crear/publicar los repositorios de los proyectos en GitHub |
+| **Adborgon con el MCP de GitHub conectado** | Materializar la plantilla `adborgon/GithubTemplate` si no existe, y crear/publicar los repositorios de los proyectos en GitHub |
 | Credenciales de Git configuradas en el sistema (p. ej. Git Credential Manager) | `push` a GitHub desde `GitLocalManager` |
 | (Opcional) `GHCR_USERNAME` + `GHCR_TOKEN` en el entorno | Publicar imágenes en GHCR (PAT con `write:packages`) |
 
@@ -22,92 +22,92 @@ compartido `adborgon/GithubTemplate`, y ciclo de vida Docker por proyecto
 
 ## Instalación
 
-### Con la skill de Bionic (recomendado)
+### Con la skill de Adborgon (recomendado)
 
-Instala la [skill `bionic-core-workflow`](#bionic-skill-bionic-core-workflow)
+Instala la [skill `Adborgon-core-workflow`](#Adborgon-skill-Adborgon-core-workflow)
 (más abajo en este README). Cuando se activa, detecta si
-`C:\Bionic\Core` existe y, si no, **clona este repositorio ahí e instala
+`C:\Adborgon\Core` existe y, si no, **clona este repositorio ahí e instala
 `requirements.txt` por ti** (sección 0 de la skill).
 
 ### Manual
 
 ```powershell
-git clone https://github.com/adborgon/bionic-core.git C:\Bionic\Core
-python -m pip install -r C:\Bionic\Core\requirements.txt
+git clone https://github.com/adborgon/Adborgon-core.git C:\Adborgon\Core
+python -m pip install -r C:\Adborgon\Core\requirements.txt
 ```
 
-## Bionic skill (`bionic-core-workflow`)
+## Adborgon skill (`Adborgon-core-workflow`)
 
 La skill orquesta todo el flujo: bootstrap → tests en sandbox → commit →
 push a GitHub → Docker. Una vez instalada, el agente no ejecuta nunca
-`git`/`pytest`/`docker` en la shell del host: todo pasa por `C:\Bionic\Core`.
+`git`/`pytest`/`docker` en la shell del host: todo pasa por `C:\Adborgon\Core`.
 
 Contenido completo de `SKILL.md` — guárdalo en
-`~/.lmstudio/skills/bionic-core-workflow/SKILL.md` (en Windows:
-`C:\Users\<usuario>\.lmstudio\skills\bionic-core-workflow\SKILL.md`):
+`~/.lmstudio/skills/Adborgon-core-workflow/SKILL.md` (en Windows:
+`C:\Users\<usuario>\.lmstudio\skills\Adborgon-core-workflow\SKILL.md`):
 
 ````markdown
 ---
-name: bionic-core-workflow
+name: Adborgon-core-workflow
 description: Orquesta la creación de proyectos desde adborgon/GithubTemplate,
   el control de versiones local, la ejecución de tests en sandbox aislado y
-  el ciclo de vida Docker usando C:\Bionic\Core. Úsala siempre que se cree
+  el ciclo de vida Docker usando C:\Adborgon\Core. Úsala siempre que se cree
   un proyecto nuevo o se ejecuten tests, commits o contenedores en un
-  proyecto Bionic.
+  proyecto Adborgon.
 ---
 
-# Bionic Core — Contrato de Orquestación
+# Adborgon Core — Contrato de Orquestación
 
-Nunca ejecutes comandos `git`, `pytest` o `docker` directamente en la shell del host. Toda operación debe realizarse a través de `C:\Bionic\Core` (`sys.path.insert(0, r"C:\Bionic")`).
+Nunca ejecutes comandos `git`, `pytest` o `docker` directamente en la shell del host. Toda operación debe realizarse a través de `C:\Adborgon\Core` (`sys.path.insert(0, r"C:\Adborgon")`).
 
 ## 0. Precondición: Core instalado
 
-Comprueba que existe `C:\Bionic\Core\tools\__init__.py`. Si **no** existe, instálalo desde GitHub (la raíz del repo `adborgon/bionic-core` **es** el paquete `Core`; clónalo como `C:\Bionic\Core`):
+Comprueba que existe `C:\Adborgon\Core\tools\__init__.py`. Si **no** existe, instálalo desde GitHub (la raíz del repo `adborgon/Adborgon-core` **es** el paquete `Core`; clónalo como `C:\Adborgon\Core`):
 
 ```python
 import subprocess, sys
 from pathlib import Path
 
-core_root = Path(r"C:\Bionic")
+core_root = Path(r"C:\Adborgon")
 core_pkg = core_root / "Core"
 if not (core_pkg / "tools" / "__init__.py").exists():
     if core_pkg.exists():
-        raise SystemExit("C:\\Bionic\\Core existe pero está incompleto: consúltalo con el usuario antes de borrar nada.")
+        raise SystemExit("C:\\Adborgon\\Core existe pero está incompleto: consúltalo con el usuario antes de borrar nada.")
     core_root.mkdir(parents=True, exist_ok=True)
     subprocess.run([sys.executable, "-m", "pip", "install", "GitPython"], check=True)
     from git import Repo
-    Repo.clone_from("https://github.com/adborgon/bionic-core.git", str(core_pkg))
+    Repo.clone_from("https://github.com/adborgon/Adborgon-core.git", str(core_pkg))
     subprocess.run(
         [sys.executable, "-m", "pip", "install", "-r", str(core_pkg / "requirements.txt")],
         check=True,
     )
-    print("Bionic Core instalado en C:\\Bionic\\Core")
+    print("Adborgon Core instalado en C:\\Adborgon\\Core")
 ```
 
-Verificación: `python -c "import sys; sys.path.insert(0, r'C:\\Bionic'); import Core.tools; print('Bionic Core OK')"`
+Verificación: `python -c "import sys; sys.path.insert(0, r'C:\\Adborgon'); import Core.tools; print('Adborgon Core OK')"`
 
 ## 1. Creación de un Proyecto Nuevo (Bootstrap)
 
 1. **Verificar/Materializar Plantilla (MCP):**
-   - Comprueba si existe `C:\Bionic\templates\adborgon\GithubTemplate`.
-   - Si no existe o el usuario pide actualizarla, usa las herramientas MCP de GitHub para descargar los archivos del repositorio `adborgon/GithubTemplate` (rama `main`) en `C:\Bionic\templates\adborgon\GithubTemplate`.
+   - Comprueba si existe `C:\Adborgon\templates\adborgon\GithubTemplate`.
+   - Si no existe o el usuario pide actualizarla, usa las herramientas MCP de GitHub para descargar los archivos del repositorio `adborgon/GithubTemplate` (rama `main`) en `C:\Adborgon\templates\adborgon\GithubTemplate`.
 2. **Ejecutar Bootstrapper:**
    ```powershell
-   python C:\Bionic\Core\tools\bionic_bootstrap.py --name <slug-proyecto> --description "<descripción>" --workdir C:\Bionic\projects
+   python C:\Adborgon\Core\tools\Adborgon_bootstrap.py --name <slug-proyecto> --description "<descripción>" --workdir C:\Adborgon\projects
    ```
-   Crea `C:\Bionic\projects\<slug>` con `.bionic/project.json`, README especializado e initial commit en `main` (con rollback automático si falla).
+   Crea `C:\Adborgon\projects\<slug>` con `.Adborgon/project.json`, README especializado e initial commit en `main` (con rollback automático si falla).
 
 ## 2. Tests en Sandbox Aislado (Docker)
 
-Nunca uses `pytest` del host. Usa `DockerSandboxManager` (la imagen `bionic-sandbox:latest` se auto-construye; el contenedor es efímero, sin red y limitado a 512 MB):
+Nunca uses `pytest` del host. Usa `DockerSandboxManager` (la imagen `Adborgon-sandbox:latest` se auto-construye; el contenedor es efímero, sin red y limitado a 512 MB):
 
 ```python
 import sys
-sys.path.insert(0, r"C:\Bionic")
+sys.path.insert(0, r"C:\Adborgon")
 from Core.tools import DockerSandboxManager
 
 with DockerSandboxManager() as sandbox:
-    result = sandbox.run_pytest(r"C:\Bionic\projects\<slug>", "-v")
+    result = sandbox.run_pytest(r"C:\Adborgon\projects\<slug>", "-v")
     print(result.exit_code, result.success, result.stdout)
 ```
 
@@ -118,7 +118,7 @@ Commitea con `GitLocalManager` (GitPython, sin shell). **Cuando los tests pasan,
 ```python
 from Core.tools import GitLocalManager
 
-mgr = GitLocalManager(r"C:\Bionic\projects\<slug>")
+mgr = GitLocalManager(r"C:\Adborgon\projects\<slug>")
 mgr.stage(["."])
 sha = mgr.commit("feat: ...")
 
@@ -135,8 +135,8 @@ results = mgr.push()  # push de la rama activa -> list[git.PushInfo]
 ```python
 from Core.tools import ProjectDockerManager
 
-with ProjectDockerManager(r"C:\Bionic\projects\<slug>") as docker:
-    docker.build()                          # -> bionic-<slug>:latest
+with ProjectDockerManager(r"C:\Adborgon\projects\<slug>") as docker:
+    docker.build()                          # -> Adborgon-<slug>:latest
     docker.run_local(command=["100", "c"])  # CLI; servicios: ports={"8000/tcp": 8000}
     print(docker.logs())
     docker.push(tag="0.1.0")                # -> ghcr.io/<usuario>/<slug>:0.1.0
@@ -153,14 +153,14 @@ with ProjectDockerManager(r"C:\Bionic\projects\<slug>") as docker:
 
 ### Cómo instalarla
 
-1. **Vía el agente (recomendado):** pega el contenido en una sesión de Bionic
+1. **Vía el agente (recomendado):** pega el contenido en una sesión de Adborgon
    y pide «instala esta skill». El agente la valida y la instala globalmente
    (pidiéndote tu aprobación).
-2. **Manual:** crea la carpeta `~/.lmstudio/skills/bionic-core-workflow/`,
+2. **Manual:** crea la carpeta `~/.lmstudio/skills/Adborgon-core-workflow/`,
    guarda el contenido como `SKILL.md` y úsala escribiendo
-   `@bionic-core-workflow` en el chat.
+   `@Adborgon-core-workflow` en el chat.
 
-Con la skill instalada, si `C:\Bionic\Core` no existe, la skill lo instala
+Con la skill instalada, si `C:\Adborgon\Core` no existe, la skill lo instala
 automáticamente desde este repositorio (sección 0).
 
 ## Estructura
@@ -170,16 +170,16 @@ Core/
 ├── __init__.py                  # API pública (lazy, PEP 562)
 ├── requirements.txt             # docker, GitPython
 ├── docker/
-│   └── bionic-sandbox/
+│   └── Adborgon-sandbox/
 │       └── Dockerfile           # Imagen del sandbox (se auto-construye)
 └── tools/
     ├── __init__.py              # API del subpaquete (Docker lazy)
-    ├── exceptions.py            # Jerarquía de excepciones (BionicCoreError)
+    ├── exceptions.py            # Jerarquía de excepciones (AdborgonCoreError)
     ├── logging_utils.py         # Logger estándar con trazabilidad
     ├── _docker_runtime.py       # Conexión compartida al daemon Docker
     ├── sandbox_manager.py       # DockerSandboxManager (Módulo 1)
     ├── git_local_manager.py     # GitLocalManager (Módulo 2)
-    ├── bionic_bootstrap.py      # CLI orquestadora (Módulo 3)
+    ├── Adborgon_bootstrap.py      # CLI orquestadora (Módulo 3)
     └── project_docker_manager.py# ProjectDockerManager (Módulo 4)
 ```
 
@@ -191,13 +191,13 @@ Core/
 from Core.tools import DockerSandboxManager
 
 with DockerSandboxManager() as sandbox:
-    result = sandbox.run_pytest(r"C:\Bionic\projects\demo", "-v")
+    result = sandbox.run_pytest(r"C:\Adborgon\projects\demo", "-v")
     print(result.exit_code, result.stdout, result.success)
 ```
 
-La imagen por defecto `bionic-sandbox:latest` extiende `python:3.11-slim`
+La imagen por defecto `Adborgon-sandbox:latest` extiende `python:3.11-slim`
 con **pytest** y se **construye sola en el primer uso** desde
-`Core/docker/bionic-sandbox`. El contenedor es **efímero** (se destruye
+`Core/docker/Adborgon-sandbox`. El contenedor es **efímero** (se destruye
 tras cada ejecución, incluso en fallo), **aislado de red**, con límite de
 memoria de **512 MB**, sin capacidades y usuario no privilegiado. El
 volumen de código se monta en `/workspace` (solo lectura por defecto).
@@ -209,7 +209,7 @@ volumen de código se monta en `/workspace` (solo lectura por defecto).
 ```python
 from Core.tools import GitLocalManager
 
-mgr = GitLocalManager(r"C:\Bionic\projects\demo")
+mgr = GitLocalManager(r"C:\Adborgon\projects\demo")
 mgr.init()                      # idempotente, rama inicial 'main'
 mgr.create_branch("feature/x")  # valida nombre, crea y hace checkout
 mgr.stage(["."])                # stage (valida que esté dentro del repo; respeta .gitignore)
@@ -228,19 +228,19 @@ usa la configuración de credenciales de Git del sistema.
 ### 3) Bootstrap de proyecto (CLI)
 
 ```powershell
-python C:\Bionic\Core\tools\bionic_bootstrap.py `
+python C:\Adborgon\Core\tools\Adborgon_bootstrap.py `
     --name my-project --description "Qué hace el proyecto"
 ```
 
 Contrato de orquestación:
 
-1. **MCP (agente)**: al ejecutar el script, el agente Bionic descarga los
+1. **MCP (agente)**: al ejecutar el script, el agente Adborgon descarga los
    archivos base de `adborgon/GithubTemplate` con sus herramientas MCP de
-   GitHub y los materializa en `C:\Bionic\templates\adborgon\GithubTemplate`
-   (o la ruta de `--template-source` / `$BIONIC_TEMPLATE_SOURCE`),
+   GitHub y los materializa en `C:\Adborgon\templates\adborgon\GithubTemplate`
+   (o la ruta de `--template-source` / `$Adborgon_TEMPLATE_SOURCE`),
    verificando la integridad por SHA de cada blob.
 2. **Replicación local**: el script copia el template, especializa el
-   `README.md` y escribe `.bionic/project.json` (nombre, descripción,
+   `README.md` y escribe `.Adborgon/project.json` (nombre, descripción,
    origen del template, timestamp).
 3. **Git local**: inicializa el repo, hace stage de todos los archivos y
    crea el *initial commit* en `main`.
@@ -252,15 +252,15 @@ El template incluye ya: `Dockerfile` (con `ENTRYPOINT`), `.dockerignore`,
 `python -m app`) y `tests/test_smoke.py`.
 
 Opciones: `--template-source`, `--workdir` (default: directorio actual),
-`--author "Name <email>"` (o `$BIONIC_AUTHOR`).
+`--author "Name <email>"` (o `$Adborgon_AUTHOR`).
 
 ### 4) Ciclo de vida Docker por proyecto
 
 ```python
 from Core.tools import ProjectDockerManager
 
-with ProjectDockerManager(r"C:\Bionic\projects\tienda-web") as docker:
-    docker.build()                    # -> bionic-tienda-web:latest
+with ProjectDockerManager(r"C:\Adborgon\projects\tienda-web") as docker:
+    docker.build()                    # -> Adborgon-tienda-web:latest
     docker.run_local(ports={"8000/tcp": 8000}, env={"APP_NAME": "tienda"})
     # ... desarrollar / probar localmente ...
     docker.push(tag="1.0.0")          # -> ghcr.io/adborgon/tienda-web:1.0.0
@@ -284,7 +284,7 @@ entorno:
 
 ## Excepciones
 
-Todo error hereda de `BionicCoreError` (con `.message` y `.details`):
+Todo error hereda de `AdborgonCoreError` (con `.message` y `.details`):
 
 * `SandboxError` → `DockerUnavailableError` / `SandboxImageError` /
   `SandboxExecutionError`
