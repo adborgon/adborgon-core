@@ -458,7 +458,7 @@ class GitLocalManager:
         """Parse a ``Name <email>`` identity string.
 
         Args:
-            identity: Identity string, e.g. ``Bionic Agent <agent@bionic.local>``.
+            identity: Identity string, e.g. ``Adborgon Agent <agent@Adborgon.local>``.
             role: Role name used in error messages.
 
         Returns:
